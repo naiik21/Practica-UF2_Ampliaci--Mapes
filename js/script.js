@@ -18,23 +18,17 @@ let tiposColumnas;
 let columnNames;
 let mitjanaNT = 0;
 let nObj = 0;
+let map = null;
+
 
 // Funció per selccionar la base de dadaes i contrlar que ho fas
 function env() {
     event.preventDefault(); // Evita la recarga de la página si es un formulario
-    try {
-        bbdd = document.querySelector('input[name=bbdd]:checked').value; //Selecciona la opció del formulari
-        lista = [];
-        tiposColumnas;
-        mitjanaNT = 0;
-        nObj = 0;
-        selectBBDD(bbdd);
-
-    } catch (error) {
-        alert("Selecciona una llista i envia");
-        location.reload();
-    }
-
+    lista = [];
+    tiposColumnas;
+    mitjanaNT = 0;
+    nObj = 0;
+    selectBBDD(bbdd);
 }
 
 // Carrega bbdd que volem utilitzar
@@ -44,7 +38,8 @@ function selectBBDD(bbdd) {
     mitjanaNT = 0;
 
     meteorits.forEach((meteorit) => {
-        lista.push([meteorit.id, meteorit.year, meteorit.name, meteorit.mass]);
+        lista.push([meteorit.id, meteorit.year, meteorit.name, meteorit.mass, ""]);
+        // coordenades = meteorit.geolocation.coordinates;
         if (meteorit.mass === undefined) {
             nObj++;
             mitjanaNT += 0;
@@ -53,8 +48,9 @@ function selectBBDD(bbdd) {
             mitjanaNT += parseFloat(meteorit.mass);
         }
     });
-    columnNames = ['ID', 'Data', 'Nom', 'Pes'];
-    tiposColumnas = ['int', 'year', 'string', 'float'];
+
+    columnNames = ['ID', 'Data', 'Nom', 'Pes', 'Mapa'];
+    tiposColumnas = ['int', 'year', 'string', 'float', 'boton'];
 
 }
 
@@ -62,8 +58,6 @@ function imprTaulaNormal() {
     selectBBDD(bbdd)
     imprTable(lista, tiposColumnas);
 }
-
-
 
 //Funció que imprimeix la taula
 function imprTable(bbdd, tiposColumnas) {
@@ -114,10 +108,10 @@ function imprTable(bbdd, tiposColumnas) {
                 case 'year':
                     let year = obj[key];
                     celda.textContent = year;
-                /*default:
-                    celda.textContent = obj[key];
-                    break;
-                */
+                case 'boton':
+                    celda.onclick = function () {
+                        mapa(obj[2]);
+                    };
             }
         });
     });
@@ -126,4 +120,34 @@ function imprTable(bbdd, tiposColumnas) {
     document.getElementById("resultat").appendChild(table);
 }
 
+function mapa(name) {
+    let x = 0;
+    let y = 0;
+    meteorits.forEach(function (meteorit) {
+        if (meteorit.name === name) {
+            x = meteorit.geolocation.coordinates[0];
+            y = meteorit.geolocation.coordinates[1];
+            console.log(x)
+            console.log(y)
+        }
+    });
+
+    // Eliminar el mapa existente si hay uno
+    if (map !== null) {
+        map.remove();
+    }
+
+    map = L.map('map').setView([x, y], 13);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+    var circle = L.circle([x, y], {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.5,
+        radius: 500
+    }).addTo(map);
+
+}
 
