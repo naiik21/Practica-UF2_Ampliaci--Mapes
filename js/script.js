@@ -123,12 +123,12 @@ function imprTable(bbdd, tiposColumnas) {
 function mapa(name) {
     let x = 0;
     let y = 0;
+    let massa = 0;
     meteorits.forEach(function (meteorit) {
         if (meteorit.name === name) {
             x = meteorit.geolocation.coordinates[0];
             y = meteorit.geolocation.coordinates[1];
-            console.log(x)
-            console.log(y)
+            massa = meteorit.mass;
         }
     });
 
@@ -137,9 +137,9 @@ function mapa(name) {
         map.remove();
     }
 
-    map = L.map('map').setView([x, y], 13);
+    map = L.map('map').setView([x, y], massa);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
+        maxZoom: 13,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
     var circle = L.circle([x, y], {
